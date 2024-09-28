@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=3 uid="uid://bkqariv48w1lq"]
+
+[ext_resource type="Script" path="res://typing_bubble.gd" id="1_18jic"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_y7518"]
+resource_local_to_scene = true
+radius = 16.0
+height = 64.0
+radial_segments = 4
+rings = 16
+
+[sub_resource type="SphereMesh" id="SphereMesh_sqn05"]
+radius = 5.0
+height = 10.0
+radial_segments = 4
+rings = 16
+
+[node name="TypingBubble" type="CanvasGroup"]
+z_index = 4096
+script = ExtResource("1_18jic")
+
+[node name="Capsule" type="MeshInstance2D" parent="."]
+rotation = 1.5708
+mesh = SubResource("CapsuleMesh_y7518")
+
+[node name="SphereLeft" type="MeshInstance2D" parent="."]
+modulate = Color(0, 0, 0, 1)
+position = Vector2(-16, 0)
+mesh = SubResource("SphereMesh_sqn05")
+
+[node name="SphereMiddle" type="MeshInstance2D" parent="."]
+modulate = Color(0, 0, 0, 1)
+mesh = SubResource("SphereMesh_sqn05")
+
+[node name="SphereRight" type="MeshInstance2D" parent="."]
+modulate = Color(0, 0, 0, 1)
+position = Vector2(16, 0)
+mesh = SubResource("SphereMesh_sqn05")
