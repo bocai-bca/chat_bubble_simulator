@@ -9,15 +9,28 @@ var text: String #气泡的文本
 var _config: CBS.BubbleConfig #气泡配置
 var _send_from_right: bool #气泡来自哪端，false左，true右
 var _life_timer: float = 0.0 #气泡的已存在时间，用于与淡入时间计算出状态和移动
-var _target_pos: Vector2 = Vector2.ZERO #移动目标坐标
-var _from_pos: Vector2 = Vector2.ZERO #移动起始坐标，搭配目标坐标和位移计时进行计算，经过缓动函数后赋于节点坐标上
-var _transform_timer: float = 0.0 #坐标位移计时器
+var _typing_time_left: float = 0.0 #剩余输入时间
+
+#transform变量组
+var _tf_pos_timer: float = 0.0 #坐标变换计时器
+var _tf_pos_from: Vector2 = Vector2.ZERO #移动目标坐标
+var _tf_pos_to: Vector2 = Vector2.ZERO #移动起始坐标
+var _tf_bubble_time: float = 0.0 #气泡变换计时器
+var _tf_bubble_x_from: float = CBSConfig.bubble_unit_pixel * 4 #气泡X起始长度(胶囊的高度)
+var _tf_bubble_x_to: float = CBSConfig.bubble_unit_pixel * 4 #气泡X目标长度(胶囊的高度)
+var _tf_bubble_y_from: float = 0.0 #气泡Y起始长度(下胶囊的Y位移)
+var _tf_bubble_y_to: float = 0.0 #气泡Y目标长度(下胶囊的Y位移)
+
 
 @onready var n_text: Label = get_node("Text") as Label
 @onready var n_bubble: Node2D = get_node("Bubble") as Node2D
 @onready var n_up_capsule: MeshInstance2D = get_node("Bubble/UpCapsule") as MeshInstance2D
 @onready var n_down_capsule: MeshInstance2D = get_node("Bubble/DownCapsule") as MeshInstance2D
 @onready var n_quad: MeshInstance2D = get_node("Bubble/Quad") as MeshInstance2D
+@onready var n_sphere_left: MeshInstance2D = get_node("SphereLeft") as MeshInstance2D
+@onready var n_sphere_middle: MeshInstance2D = get_node("SphereMiddle") as MeshInstance2D
+@onready var n_sphere_right: MeshInstance2D = get_node("SphereRight") as MeshInstance2D
+
 
 func _enter_tree() -> void:
 	set_visible(false)
@@ -28,6 +41,7 @@ func _ready() -> void:
 	print("Bubble Creating Debug: open , right = ", _send_from_right)
 	#气泡构成组织
 	n_text.label_settings.font_size = int(CBSConfig.bubble_unit_pixel) #设置文本字体大小
+	n_text.modulate = Color(1.0, 1.0, 1.0, 0.0)
 	# 求文本框大小
 	var __text_splitted: PackedStringArray = text.split("\n") #将文本以行列分段的列表
 	var __length_array: Array[float] = [] #长度表
@@ -43,7 +57,7 @@ func _ready() -> void:
 	var __bubble_empty_width: float = __bubble_empty_width_multiplier * CBSConfig.bubble_unit_pixel #求气泡与文本的宽度差值，表示将上述比值求出结果的明确的像素数值
 	#  构成气泡的X
 	var __bubble_width: float = __bubble_empty_width + __length_array[-1]
-	(n_up_capsule.mesh as CapsuleMesh).height = __bubble_width #将X赋予胶囊形
+	_tf_bubble_x_to = __bubble_width #将X赋予胶囊形
 	(n_quad.mesh as QuadMesh).size.x = __bubble_width #将X赋予矩形
 	#  /构成气泡的X
 	#  构成气泡的Y
@@ -53,9 +67,7 @@ func _ready() -> void:
 		n_text.set_text(text) #用于用玄学修复set_size不影响Y的问题
 		n_down_capsule.set_visible(false)
 		n_quad.set_visible(false)
-		n_down_capsule.position.y = 0.0 #设置下胶囊的Y位置
-		n_quad.position.y = 0.0 #设置矩形的Y位置，为下胶囊与上胶囊位置的中心
-		(n_quad.mesh as QuadMesh).size.y = 0.0 #设置矩形的高度
+		_tf_bubble_y_to = 0.0
 		n_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	else: #多行文本
 		n_text.set_text("") #用于用玄学修复set_size不影响Y的问题
@@ -65,9 +77,7 @@ func _ready() -> void:
 		var __bubble_height: float = n_text.size.y - 6.0
 		var __capsule_radius: float = CBSConfig.bubble_unit_pixel #获取胶囊半径，该值等同于文本字体大小
 		var __capsule_offset: float = __bubble_height - __capsule_radius #计算下胶囊偏移距离
-		n_down_capsule.position.y = __capsule_offset #设置下胶囊的Y位置
-		n_quad.position.y = __capsule_offset / 2.0 #设置矩形的Y位置，为下胶囊与上胶囊位置的中心
-		(n_quad.mesh as QuadMesh).size.y = __capsule_offset #设置矩形的高度
+		_tf_bubble_y_to = __capsule_offset
 	#  /构成气泡的Y
 	(n_up_capsule.mesh as CapsuleMesh).set_rings(CBSConfig.bubble_mesh_rings) #设置气泡环数
 	# /求气泡大小并构成气泡
@@ -76,33 +86,34 @@ func _ready() -> void:
 	n_bubble.modulate = _config.fill_color
 	n_text.label_settings.font_color = _config.text_color
 	# /设置颜色
-	# 将文本居中于气泡中心
-	n_text.set_position(n_quad.position + n_text.size / -2.0 + Vector2(0.0, -0.5))
-	# /将文本居中于气泡中心
 	#/气泡构成组织
 	#气泡缩放
 	(n_up_capsule.mesh as CapsuleMesh).radius = CBSConfig.bubble_unit_pixel
 	#/气泡缩放
 	#设定气泡位置
-	var __anchor_offset: Vector2 = n_down_capsule.position + Vector2(0.0, (n_down_capsule.mesh as CapsuleMesh).radius) #从锚点(中心)到定位点的坐标偏移量
+	var __anchor_offset: Vector2 = Vector2(0.0, _tf_bubble_y_to + (n_down_capsule.mesh as CapsuleMesh).radius) #从锚点(中心)到定位点的坐标偏移量
 	var __target: Vector2 #用于计算目标位置的坐标
 	var __bottom_distance: float = CBS.viewport_width * CBSConfig.screen_bubble_bottom_distance_multiplier
+	var __beside_distance: float = CBS.viewport_width * CBSConfig.screen_bubble_border_distance_multiplier
 	if (_send_from_right): #如果是靠右的气泡
-		__anchor_offset += Vector2((n_up_capsule.mesh as CapsuleMesh).height / 2.0, 0.0)
+		__anchor_offset += Vector2(_tf_bubble_x_to / 2.0, 0.0)
 		#前往右下角
 		__target = Vector2(CBS.viewport_width * (1.0 - CBSConfig.screen_bubble_border_distance_multiplier), CBS.viewport_width * (1.0 - CBSConfig.screen_bubble_bottom_distance_multiplier))
 		#/前往右下角
 	else: #如果是靠左的气泡
-		__anchor_offset -= Vector2((n_up_capsule.mesh as CapsuleMesh).height / 2.0, 0.0)
+		__anchor_offset -= Vector2(_tf_bubble_x_to / 2.0, 0.0)
 		#前往左下角
-		__target = Vector2(CBS.viewport_width * CBSConfig.screen_bubble_border_distance_multiplier, CBS.viewport_width * (1.0 - CBSConfig.screen_bubble_bottom_distance_multiplier))
+		__target = Vector2(__beside_distance, CBS.viewport_width * (1.0 - CBSConfig.screen_bubble_bottom_distance_multiplier))
 		#/前往左下角
-	var __start_pos_offset: Vector2 = Vector2(0.0, (n_up_capsule.mesh as CapsuleMesh).radius * -2.0 - n_down_capsule.position.y - __bottom_distance)
+	var __start_pos_offset: Vector2 = Vector2(0.0, (n_up_capsule.mesh as CapsuleMesh).radius * -2.0 - _tf_bubble_y_to - __bottom_distance)
 	if ((_send_from_right and CBS.last_bubble_side == 2) or (not _send_from_right and CBS.last_bubble_side == 1)): #如果上一个气泡与自己同侧
 		print("Bubble Creating Debug: same side")
 		__start_pos_offset += Vector2(0.0, 0.75 * CBS.viewport_width * CBSConfig.screen_bubble_bottom_distance_multiplier)
-	_target_pos = __target - __anchor_offset - __start_pos_offset
-	_from_pos = _target_pos
+	_tf_pos_to = __target - __anchor_offset - __start_pos_offset
+	if (_send_from_right):
+		_tf_pos_from = Vector2(CBS.viewport_width - __beside_distance * 3.0 - (n_up_capsule.mesh as CapsuleMesh).radius, _tf_pos_to.y)
+	else:
+		_tf_pos_from = Vector2(__beside_distance * 3.0 + (n_up_capsule.mesh as CapsuleMesh).radius, _tf_pos_to.y)
 	CBS.current.emit_signal("bubbles_move", __start_pos_offset)
 	CBS.current.emit_signal("bubbles_add_number")
 	match (_send_from_right):
@@ -113,10 +124,25 @@ func _ready() -> void:
 	#/设定气泡位置
 
 func _physics_process(__delta: float) -> void:
+	__delta *= CBSConfig.time_speed
 	self_modulate = Color(1.0, 1.0, 1.0, clampf(_life_timer, 0.0, CBSConfig.bubble_fadein_time) / CBSConfig.bubble_fadein_time)
-	position = _from_pos.lerp(_target_pos, smoothstep(0.0, CBSConfig.bubble_fadein_time, _transform_timer))
+	position = _tf_pos_from.lerp(_tf_pos_to, smoothstep(0.0, CBSConfig.bubble_fadein_time, _tf_pos_timer))
 	_life_timer += __delta #存活时间增加
-	_transform_timer += __delta #位移计时增加
+	_typing_time_left -= __delta #打字时间减少
+	_tf_pos_timer += __delta #位移计时增加
+	if (_typing_time_left <= 0.0): #如果已经完成打字
+		_tf_bubble_time += __delta #气泡变换计时增加
+	(n_up_capsule.mesh as CapsuleMesh).height = _tf_bubble_x_from + (_tf_bubble_x_to - _tf_bubble_x_from) * smoothstep(0.0, CBSConfig.bubble_fadein_time, _tf_bubble_time)
+	(n_quad.mesh as QuadMesh).size.x = _tf_bubble_x_from + (_tf_bubble_x_to - _tf_bubble_x_from) * smoothstep(0.0, CBSConfig.bubble_fadein_time, _tf_bubble_time)
+	var __y_now: float = _tf_bubble_y_from + (_tf_bubble_y_to - _tf_bubble_y_from) * smoothstep(0.0, CBSConfig.bubble_fadein_time, _tf_bubble_time)
+	n_down_capsule.position.y = __y_now #设置下胶囊的Y位置
+	n_quad.position.y = __y_now / 2.0 #设置矩形的Y位置，为下胶囊与上胶囊位置的中心
+	(n_quad.mesh as QuadMesh).size.y = __y_now #设置矩形的高度
+	n_text.set_position(n_quad.position + n_text.size / -2.0 + Vector2(0.0, -0.5)) #将文本居中于气泡中心
+	#重设可见性，用于刷新MeshInstance节点的渲染边界
+	n_up_capsule.set_visible(false)
+	n_up_capsule.set_visible(true)
+	#/重设可见性，用于刷新MeshInstance节点的渲染边界
 	set_visible(true)
 
 func _find_min_length_of_line(__single_line: String, out__is_auto_warp: Array[bool]) -> float:
@@ -141,9 +167,9 @@ func _find_min_length_of_line(__single_line: String, out__is_auto_warp: Array[bo
 	return clampf(__result, (CBSConfig.bubble_max_width_multiplier - CBSConfig.bubble_text_max_width_multiplier) * CBSConfig.bubble_unit_pixel * 1.5, __result)
 
 func on_bubbles_move(__pos_add: Vector2) -> void: #收到移动气泡的信号时，将自身坐标加上传入参数
-	_from_pos = _from_pos.lerp(_target_pos, clampf(_transform_timer, 0.0, CBSConfig.bubble_fadein_time) / CBSConfig.bubble_fadein_time)
-	_target_pos += __pos_add
-	_transform_timer = 0.0
+	_tf_pos_from = _tf_pos_from.lerp(_tf_pos_to, clampf(_tf_pos_timer, 0.0, CBSConfig.bubble_fadein_time) / CBSConfig.bubble_fadein_time)
+	_tf_pos_to += __pos_add
+	_tf_pos_timer = 0.0
 
 func on_bubbles_add_number() -> void: #收到增加气泡序号的信号时，给自身序号增加1
 	bubble_number += 1

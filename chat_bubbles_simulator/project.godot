@@ -28,6 +28,14 @@ movie_writer/mix_rate=44100
 movie_writer/mjpeg_quality=0.5
 movie_writer/movie_file="D:/ItemBox/godot/chat_bubbles_simulator/movie_output/0.avi"
 
+[input]
+
+lmb={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":1,"position":Vector2(221, 30),"global_position":Vector2(235, 100),"factor":1.0,"button_index":1,"canceled":false,"pressed":true,"double_click":false,"script":null)
+]
+}
+
 [rendering]
 
 renderer/rendering_method="mobile"

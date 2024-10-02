@@ -5,7 +5,7 @@ extends Node2D
 signal bubbles_move(relative_pos: Vector2)
 signal bubbles_add_number()
 
-const CURRENT_VERSION: String = "0.0.0"
+const CURRENT_VERSION: String = "0.0.1"
 const WORK_MODE_VIDEO: int = 0
 const WORK_MODE_IMAGE: int = 1
 
@@ -57,11 +57,16 @@ func _physics_process(__delta: float) -> void:
 			get_tree().call_deferred("quit")
 		_state += 1
 	elif (_state == 1): #如果状态处于主循环
+		__delta *= CBSConfig.time_speed
 		match (CBSConfig.work_mode): #匹配工作模式
 			WORK_MODE_VIDEO:
 				_main_video(__delta)
 			WORK_MODE_IMAGE:
 				_main_image(__delta)
+	#debug
+	if (Input.is_action_pressed("lmb")):
+		print(get_viewport().get_mouse_position())
+	#/debug
 
 func _main_video(__delta: float) -> void: #Video模式的主循环
 	_left_timer += __delta #左计时器加时

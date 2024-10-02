@@ -8,6 +8,10 @@ extends Object
 ##     |      |      |       ##
 ##     V      V      V       ##
 
+#	时间速率TimeSpeed
+static var time_speed: float = 1.0
+#	
+
 #	背景颜色
 static var background_color: Color = Color(0.8, 0.8, 0.8)
 #	background_color
@@ -101,13 +105,13 @@ static var work_mode: int = CBS.WORK_MODE_VIDEO
 static var messages: Array[CBS.MessageStruct] = [
 	#CBS.MessageStruct.new(false, "Example left.", 0.0, 1.2),
 	#CBS.MessageStruct.new(true, "Example right.", 1.7, 0.0),
-	CBS.MessageStruct.new(false, "这真的是我第一次知道这件事", 1.0, 0.0),
-	CBS.MessageStruct.new(true, "知道什么事呀", 2.0, 0.0),
-	CBS.MessageStruct.new(false, "@小豆老师 Python的for循环会保留迭代的变量，没有作用域", 2.0, 0.0),
-	CBS.MessageStruct.new(true, "这个我倒是早就知道了", 2.0, 0.0),
-	CBS.MessageStruct.new(false, "从来没试过", 1.5, 0.0),
-	CBS.MessageStruct.new(true, "python里面声明变量作用域的好像是global和nonlocal两个关键字吧", 3.0, 0.0),
-	CBS.MessageStruct.new(true, "只能在函数里面用？", 1.0, 0.0),
+	CBS.MessageStruct.new(false, "这真的是我第一次知道这件事", 0.25, 0.0),
+	CBS.MessageStruct.new(true, "知道什么事呀", 0.5, 0.0),
+	CBS.MessageStruct.new(false, "@小豆老师 Python的for循环会保留迭代的变量，没有作用域", 0.5, 0.0),
+	CBS.MessageStruct.new(true, "这个我倒是早就知道了", 0.25, 0.0),
+	CBS.MessageStruct.new(false, "从来没试过", 0.375, 0.0),
+	CBS.MessageStruct.new(true, "python里面声明变量作用域的好像是global和nonlocal两个关键字吧", 0.75, 0.0),
+	CBS.MessageStruct.new(true, "只能在函数里面用？", 0.5, 0.0),
 ]
 #	messages, each element is a message bubble.
 #	

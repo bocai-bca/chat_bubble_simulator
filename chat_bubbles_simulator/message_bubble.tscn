@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://cr3b1dkt1mluv"]
+[gd_scene load_steps=6 format=3 uid="uid://cr3b1dkt1mluv"]
 
 [ext_resource type="Script" path="res://message_bubble.gd" id="1_kke3o"]
 
@@ -19,6 +19,12 @@ line_spacing = -6.0
 font_color = Color(0, 0, 0, 1)
 shadow_size = 0
 
+[sub_resource type="SphereMesh" id="SphereMesh_fnshi"]
+radius = 5.0
+height = 10.0
+radial_segments = 4
+rings = 16
+
 [node name="MessageBubble" type="CanvasGroup"]
 script = ExtResource("1_kke3o")
 
@@ -32,7 +38,6 @@ mesh = SubResource("CapsuleMesh_y7518")
 mesh = SubResource("QuadMesh_ps16m")
 
 [node name="DownCapsule" type="MeshInstance2D" parent="Bubble"]
-position = Vector2(0, 5)
 rotation = 1.5708
 mesh = SubResource("CapsuleMesh_y7518")
 
@@ -46,3 +51,17 @@ label_settings = SubResource("LabelSettings_latlr")
 autowrap_mode = 1
 justification_flags = 160
 text_direction = 1
+
+[node name="SphereLeft" type="MeshInstance2D" parent="."]
+modulate = Color(0, 0, 0, 1)
+position = Vector2(-16, 0)
+mesh = SubResource("SphereMesh_fnshi")
+
+[node name="SphereMiddle" type="MeshInstance2D" parent="."]
+modulate = Color(0, 0, 0, 1)
+mesh = SubResource("SphereMesh_fnshi")
+
+[node name="SphereRight" type="MeshInstance2D" parent="."]
+modulate = Color(0, 0, 0, 1)
+position = Vector2(16, 0)
+mesh = SubResource("SphereMesh_fnshi")
