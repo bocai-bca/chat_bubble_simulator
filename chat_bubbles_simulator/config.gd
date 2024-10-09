@@ -9,7 +9,7 @@ extends Object
 ##     V      V      V       ##
 
 #	时间速率TimeSpeed
-static var time_speed: float = 0.25
+static var time_speed: float = 0.75
 #
 
 #	背景颜色
@@ -38,9 +38,33 @@ static var bubble_mesh_rings: int = 16
 #	bubble_mesh_rings, be used at the attribute mesh.rings of MeshInstance2D of each bubble.
 
 
+#	气泡变换缓动曲线值
+static var bubble_transform_ease_curve: float = -2.2
+#	bubble_transform_ease_curve
+#	ease(x, this)
+
+
 #	气泡淡入时间
 static var bubble_fadein_time: float = 0.2
 #	bubble_fadein_time(seconds), bubbles fade-in animation time.
+#	Only work on Video Mode.
+
+
+#	文本开始淡入时间
+static var text_fadein_start_time: float = 0.15
+#	text_fadein_start_time(seconds).
+#	Only work on Video Mode.
+
+
+#	文本淡入时间
+static var text_fadein_time: float = 0.05
+#	text_fadein_time(seconds).
+#	Only work on Video Mode.
+
+
+#	气泡角变换时间
+static var bubble_corner_animation_time: float = 0.4
+#	bubble_corner_animation_time(seconds).
 #	Only work on Video Mode.
 
 
@@ -48,6 +72,13 @@ static var bubble_fadein_time: float = 0.2
 static var bubble_unit_pixel: float = 48.0
 #	(A bubble.)
 #	 ^ Control bubbles' zoom
+
+
+#	气泡角最小半径CornerRadius
+static var bubble_corner_min_radius: float = 4.0
+#	L A bubble.)
+#	^ Control bubbles' corner's radius
+#	Standalone to bubble_unit_pixel, cannot larger than bubble_unit_pixel
 
 
 #	气泡最大宽度乘数
@@ -73,9 +104,7 @@ static var bubble_text_max_width_multiplier: float = 16.0
 
 
 #	气泡输入宽度乘数TypingWidth
-static var bubble_typing_width_multiplier: float = 4.0 / 3.0
-
-#	气泡最小宽度乘数MinWidth
+#static var bubble_typing_width_multiplier: float = 4.0 / 3.0
 
 
 #	气泡侧向边距长度乘数
@@ -97,6 +126,16 @@ static var screen_bubble_bottom_distance_multiplier: float = 0.025
 #	|-----------------------| <-- viewport bottom
 
 
+#	同侧气泡的纵向间距乘数
+static var screen_same_side_bubbles_distance_multiplier: float = 0.2
+#	the distance = this * screen_bubble_bottom_distance_multiplier * viewport_height
+#	0.0 - 1.0
+#
+#	|     (A right bubble.) |
+#	|                    ]<-|--- THE HEIGHT OF HERE
+#	|     (A right bubble.) |
+
+
 #	工作模式WorkMode
 static var work_mode: int = CBS.WORK_MODE_VIDEO
 #	Value can be:
@@ -110,13 +149,13 @@ static var work_mode: int = CBS.WORK_MODE_VIDEO
 static var messages: Array[CBS.MessageStruct] = [
 	#CBS.MessageStruct.new(false, "Example left.", 0.0, 1.2),
 	#CBS.MessageStruct.new(true, "Example right.", 1.7, 0.0),
-	CBS.MessageStruct.new(false, "这真的是我第一次知道这件事", 0.25, 0.0),
-	CBS.MessageStruct.new(true, "知道什么事呀", 0.5, 0.0),
-	CBS.MessageStruct.new(false, "@小豆老师 Python的for循环会保留迭代的变量，没有作用域", 0.5, 0.0),
-	CBS.MessageStruct.new(true, "这个我倒是早就知道了", 0.25, 0.0),
-	CBS.MessageStruct.new(false, "从来没试过", 0.375, 0.0),
-	CBS.MessageStruct.new(true, "python里面声明变量作用域的好像是global和nonlocal两个关键字吧", 0.75, 0.0),
-	CBS.MessageStruct.new(true, "只能在函数里面用？", 0.5, 0.0),
+	CBS.MessageStruct.new(true, "hi dear what are you doing?", 1.0, 0.0),
+	CBS.MessageStruct.new(false, "checking a godot project", 3.0, 0.0),
+	CBS.MessageStruct.new(true, "what project", 3.0, 0.0),
+	CBS.MessageStruct.new(false, "chat bubble simulator", 2.5, 0.0),
+	CBS.MessageStruct.new(false, "it can simulate chatting apps' ui", 2.0, 0.0),
+	CBS.MessageStruct.new(false, "like us right now", 1.5, 0.0),
+	CBS.MessageStruct.new(true, "WOW COOL", 7.0, 0.0)
 ]
 #	messages, each element is a message bubble.
 #
@@ -129,13 +168,13 @@ static var messages: Array[CBS.MessageStruct] = [
 #
 #	An example:
 #		static var messages: Array[CBS.MessageStruct] = [
-#			CBS.MessageStruct.new(true, "hi dear what are you doing?", 0.0, 4.2),
-#			CBS.MessageStruct.new(false, "checking a godot project", 2.0, 6.4),
-#			CBS.MessageStrcut.new(true, "what project", 3.4, 1.9),
-#			CBS.MessageStruct.new(false, "chat bubble simulator", 2.2, 5.3),
-#			CBS.MessageStruct.new(false, "it can simulate chatting apps' ui", 0.5, 8.0),
-#			CBS.MessageStruct.new(false, "like us right now", 0.3, 4.5),
-#			CBS.MessageStruct.new(true, "WOW COOL", 9.0, 0.7)
+#			CBS.MessageStruct.new(true, "hi dear what are you doing?", 1.0, 0.0),
+#			CBS.MessageStruct.new(false, "checking a godot project", 3.0, 0.0),
+#			CBS.MessageStruct.new(true, "what project", 3.0, 0.0),
+#			CBS.MessageStruct.new(false, "chat bubble simulator", 2.5, 0.0),
+#			CBS.MessageStruct.new(false, "it can simulate chatting apps' ui", 1.0, 0.0),
+#			CBS.MessageStruct.new(false, "like us right now", 0.5, 0.0),
+#			CBS.MessageStruct.new(true, "WOW COOL", 5.0, 0.0)
 #		]
 
 

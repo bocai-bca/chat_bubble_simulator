@@ -5,14 +5,14 @@ extends Node2D
 signal bubbles_move(relative_pos: Vector2)
 signal bubbles_add_number()
 
-const CURRENT_VERSION: String = "0.1.0"
+const CURRENT_VERSION: String = "0.2.0"
 const WORK_MODE_VIDEO: int = 0
 const WORK_MODE_IMAGE: int = 1
 
 static var viewport_width: float
 static var viewport_height: float
 static var current: CBS #用于访问当前的伪单例
-static var last_bubble_side:int = 0 #记录上一个生成的气泡来自哪侧，0=空，1=左，2=右
+static var newest_bubble_side:int = 0 #记录上一个生成的气泡来自哪侧，0=空，1=左，2=右
 var _state: int = 0 #0=初始化前,1=主循环,2=最后一次循环并标记退出,3=现在退出
 var _left_timer: float = 0.0 #左侧计时器
 var _right_timer: float = 0.0 #右侧计时器
@@ -63,10 +63,6 @@ func _physics_process(__delta: float) -> void:
 				_main_video(__delta)
 			WORK_MODE_IMAGE:
 				_main_image(__delta)
-	#debug
-	if (Input.is_action_pressed("lmb")):
-		print(get_viewport().get_mouse_position())
-	#/debug
 
 func _main_video(__delta: float) -> void: #Video模式的主循环
 	_left_timer += __delta #左计时器加时
@@ -103,7 +99,7 @@ func _main_video(__delta: float) -> void: #Video模式的主循环
 			_right_index += 1
 		else: #右计时器未达到等待时长
 			__loop_control = false #结束循环
-	if (_left_index >= _left_array.size() and _right_index >= _right_array.size() and minf(_left_timer, _right_timer) >= CBSConfig.bubble_fadein_time): #如果左侧右侧均已完成，并且数字最小的计时器也达到了气泡的淡入时间
+	if (_left_index >= _left_array.size() and _right_index >= _right_array.size() and minf(_left_timer, _right_timer) >= maxf(CBSConfig.bubble_fadein_time - CBSConfig.text_fadein_start_time + CBSConfig.text_fadein_time, CBSConfig.bubble_corner_animation_time)): #如果左侧右侧均已完成，并且数字最小的计时器也达到了气泡的淡入时间
 		_state = 2 #标记于接下来的第二刻退出项目
 
 func _main_image(__delta: float) -> void: #Image模式的主循环
