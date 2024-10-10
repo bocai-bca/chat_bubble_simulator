@@ -11,6 +11,7 @@ var _send_from_right: bool #气泡来自哪端，false左，true右
 var _life_timer: float = 0.0 #气泡的已存在时间，用于与淡入时间计算出状态和移动
 #var _typing_time_left: float = 0.0 #剩余输入时间
 var _show_corner: bool = true #控制是否显示气泡角
+var _audio_played: bool = false #记录气泡是否已放过发送音频
 
 #transform变量组
 var _tf_pos_timer: float = 0.0 #坐标变换计时器
@@ -44,6 +45,10 @@ func _ready() -> void:
 	print("Bubble Creating Debug: open , right = ", _send_from_right)
 	_old_build_bubble()
 	_old_fit_position()
+	if (_send_from_right):
+		CBS.current.n_audio_imessage_send.play()
+	else:
+		CBS.current.n_audio_imessage_receive.play()
 
 func _physics_process(__delta: float) -> void:
 	__delta *= CBSConfig.time_speed

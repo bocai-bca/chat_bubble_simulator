@@ -5,7 +5,7 @@ extends Node2D
 signal bubbles_move(relative_pos: Vector2)
 signal bubbles_add_number()
 
-const CURRENT_VERSION: String = "0.2.0"
+const CURRENT_VERSION: String = "0.2.1"
 const WORK_MODE_VIDEO: int = 0
 const WORK_MODE_IMAGE: int = 1
 
@@ -21,6 +21,10 @@ var _right_array: Array[MessageStruct] = [] #右侧气泡列表，用于Video模
 var _left_index: int = 0 #CBSConfig.messages的索引计数，用于左侧气泡列表
 var _right_index: int = 0 #CBSConfig.messages的索引计数，用于右侧气泡列表
 var _is_left_typing: bool = false #左侧是否正在打字，决定当前计时使用等待时间还是打字时间
+var _auto_exit_timer: float = 0.0 #自动退出计时器
+
+@onready var n_audio_imessage_send: AudioStreamPlayer = get_node("Audio_iMessageSend")
+@onready var n_audio_imessage_receive: AudioStreamPlayer = get_node("Audio_iMessageReceive")
 
 func _enter_tree() -> void:
 	current = self
@@ -48,14 +52,18 @@ func _ready() -> void:
 	else:
 		print("Work mode = Image Mode")
 		print("Total messages = " + str(__total_messages))
+	for __audio in get_tree().get_nodes_in_group("Audio"):
+		(__audio as AudioStreamPlayer).pitch_scale = CBSConfig.time_speed
 	if (_state == 0):
 		_state = 1
 
 func _physics_process(__delta: float) -> void:
 	if (_state >= 2 and CBSConfig.auto_exit): #退出处理逻辑
-		if (_state >= 3):
-			get_tree().call_deferred("quit")
-		_state += 1
+		_auto_exit_timer += __delta
+		if (_auto_exit_timer >= CBSConfig.auto_exit_wait_time):
+			if (_state >= 3):
+				get_tree().call_deferred("quit")
+			_state += 1
 	elif (_state == 1): #如果状态处于主循环
 		__delta *= CBSConfig.time_speed
 		match (CBSConfig.work_mode): #匹配工作模式

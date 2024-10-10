@@ -9,7 +9,7 @@ extends Object
 ##     V      V      V       ##
 
 #	时间速率TimeSpeed
-static var time_speed: float = 0.75
+static var time_speed: float = 1.0
 #
 
 #	背景颜色
@@ -45,25 +45,25 @@ static var bubble_transform_ease_curve: float = -2.2
 
 
 #	气泡淡入时间
-static var bubble_fadein_time: float = 0.2
+static var bubble_fadein_time: float = 0.25
 #	bubble_fadein_time(seconds), bubbles fade-in animation time.
 #	Only work on Video Mode.
 
 
 #	文本开始淡入时间
-static var text_fadein_start_time: float = 0.15
+static var text_fadein_start_time: float = 0.2
 #	text_fadein_start_time(seconds).
 #	Only work on Video Mode.
 
 
 #	文本淡入时间
-static var text_fadein_time: float = 0.05
+static var text_fadein_time: float = 0.07
 #	text_fadein_time(seconds).
 #	Only work on Video Mode.
 
 
 #	气泡角变换时间
-static var bubble_corner_animation_time: float = 0.4
+static var bubble_corner_animation_time: float = 0.5
 #	bubble_corner_animation_time(seconds).
 #	Only work on Video Mode.
 
@@ -178,12 +178,17 @@ static var messages: Array[CBS.MessageStruct] = [
 #		]
 
 
-#	气泡超出屏幕后自动删除
+#	气泡超出屏幕后自动删除(未完成)
 static var auto_free: bool = false
 #	Free bubble nodes which are out of viewport automatically.
 #	Only work on Video Mode.
 
 
 #	自动退出
-static var auto_exit: bool = false
+static var auto_exit: bool = true
 #	auto_exit, control project auto exit when simulation finished
+
+
+#	自动退出等待时间
+static var auto_exit_wait_time: float = 1.0
+#	auto_exit_wait_time(seconds)
