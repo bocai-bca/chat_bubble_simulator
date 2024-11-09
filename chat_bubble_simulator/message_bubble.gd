@@ -14,8 +14,8 @@ var _show_corner: bool = true #控制是否显示气泡角
 
 #transform变量组
 var _tf_pos_timer: float = 0.0 #坐标变换计时器
-var _tf_pos_from: Vector2 = Vector2.ZERO #移动目标坐标
-var _tf_pos_to: Vector2 = Vector2.ZERO #移动起始坐标
+var _tf_pos_from: Vector2 = Vector2.ZERO #移动起始坐标
+var _tf_pos_to: Vector2 = Vector2.ZERO #移动目标坐标
 var _tf_bubble_timer: float = 0.0 #气泡变换计时器
 var _tf_bubble_x_from: float = CBSConfig.bubble_unit_pixel * 4 #气泡X起始长度(胶囊的高度)
 var _tf_bubble_x_to: float = CBSConfig.bubble_unit_pixel * 4 #气泡X目标长度(胶囊的高度)
@@ -42,9 +42,10 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	print("Bubble Creating Debug: open , right = ", _send_from_right)
-	n_text.label_settings.font = CBSConfig.label_font
+	if (CBSConfig.label_font != null):
+		n_text.label_settings.font = CBSConfig.label_font
 	_old_build_bubble()
-	_old_fit_position()
+	_new_fit_position()
 	if (_send_from_right):
 		CBS.current.n_audio_imessage_send.play()
 	else:
@@ -213,6 +214,54 @@ func _old_fit_position() -> void: #根据气泡渲染的形状适配坐标变换
 			CBS.newest_bubble_side = 2
 	CBS.current.emit_signal("bubbles_add_number")
 	#/设定气泡位置
+
+func _new_fit_position() -> void: #从_old_fit_position()修改而来的坐标适配函数，用法和它一致。适用于输入气泡和直接成品的气泡
+	#要做的事情：
+	#	设定成员变量_tf_pos_from和_tf_pos_to
+	#	设定局部变量__start_pos_offset，该Vector2变量的内容是新气泡淡入时，总体气泡的移动量，将在本函数末尾被信号广播bubbles_move作为参数
+	var __bottom_distance: float = CBSConfig.bubble_unit_pixel * CBSConfig.screen_bubble_bottom_distance_multiplier #赋值声明__buttom_distance，译作屏幕底部边距，代表新气泡的底部边缘到视口底部的距离，单位是像素
+	var __beside_distance: float = CBSConfig.bubble_unit_pixel * CBSConfig.screen_bubble_border_distance_multiplier #赋值声明__beside_distance，译作屏幕侧向边距，代表新气泡所属于的侧向所对应的气泡侧面边缘到对应的视口边缘的距离，单位是像素。例如，若气泡为右气泡，则该变量用作该气泡右侧边缘到视口右侧边缘的距离
+	#var __start_pos_offset: Vector2 #声明__start_pos_offset，译作起始偏移，代表新气泡淡入时包括自身在内的所有气泡的_tf_pos_to的加数，将在本函数末尾被跟随信号广播出去
+	#起始偏移赋值
+	#__start_pos_offset = Vector2(0.0, 0.0) #初始赋值
+	#__start_pos_offset.y -= __bottom_distance + 2 * (n_up_capsule.mesh as CapsuleMesh).radius + _tf_bubble_y_to #减上屏幕底部边距和本气泡的整个厚度(本气泡的厚度之所以使用_tf_bubble_y_to是因为在执行到此处的时候气泡的厚度还为0，将在process函数中缓动过渡到_tf_bubble_y_to)，这样可以使得最后气泡们的_tf_pos_to会比_tf_pos_from要少这个量，也就对应了向上方向移动这个量
+	#/起始偏移赋值
+	var __start_pos_offset: Vector2 = Vector2(0.0, -__bottom_distance - 2.0 * (n_up_capsule.mesh as CapsuleMesh).radius - _tf_bubble_y_to) #上方注释掉的代码的压缩
+	#锚点偏移赋值
+	var __anchor_offset: Vector2 #赋值声明__anchor_offset，译作锚点偏移，代表从本气泡锚点到本气泡所属于的侧向所对应的新气泡定位点(如屏幕左下角或右下角)的偏移量，本值=定位点-本气泡锚点
+	#定位点的意思：
+	#	若为左下角，即为Vector2(屏幕侧向边距, 视口高度 - 屏幕底部边距)
+	#	若为右下角，即为Vector2(视口长度 - 屏幕侧向边距, 视口高度 - 屏幕底部边距)
+	__anchor_offset = Vector2(0.0, (n_up_capsule.mesh as CapsuleMesh).radius + _tf_bubble_y_to) #赋值并设定y，为气泡胶囊的半径加上气泡矩形的变换目标厚度
+	if (_send_from_right): #如果气泡所属侧向是右侧
+		__anchor_offset.x = 0.5 * _tf_bubble_x_to #将锚点偏移的x赋值为本气泡矩形的变换目标长度
+	else: #否则(如果气泡所属侧向是左侧)
+		__anchor_offset.x = -0.5 * _tf_bubble_x_to
+	#/锚点偏移赋值
+	#移动目标坐标赋值(相当于将定位点移动至新气泡所需要处于的位置，也就是左下角或右下角)
+	var __target_pos: Vector2 #声明__target_pos，译作移动目标坐标，代表本气泡的定位点在其淡入完毕时应在的位置
+	__target_pos = Vector2(0.0, CBS.viewport_height - __bottom_distance) #赋值并设定y，为视口纵向长度减去屏幕底部边距
+	if (_send_from_right): #如果气泡所属侧向是右侧
+		__target_pos.x = CBS.viewport_width - __beside_distance
+	else:
+		__target_pos.x = __beside_distance
+	#/移动目标坐标赋值
+	#同侧气泡计算
+	if ((_send_from_right and CBS.newest_bubble_side == 2) or (not _send_from_right and CBS.newest_bubble_side == 1)): #如果本气泡与上一个气泡同侧
+		print("Bubble Creating Debug: same side")
+		__start_pos_offset.y += __bottom_distance * clampf(1.0 - CBSConfig.screen_same_side_bubbles_distance_multiplier, 0.0, 1.0) #将偏移值加上同侧气泡的距离缩短
+	#/同侧气泡计算
+	#计算并赋出_tf_pos_from和_tf_pos_to
+	_tf_pos_to = __target_pos - __anchor_offset - __start_pos_offset
+	_tf_pos_from = _tf_pos_to + Vector2(0.0, 2.0 * (n_up_capsule.mesh as CapsuleMesh).radius + _tf_bubble_y_to)
+	#/计算并赋出_tf_pos_from和_tf_pos_to
+	CBS.current.emit_signal("bubbles_move", __start_pos_offset) #广播信号bubbles_move，并传参__start_pos_offset，将让所有气泡将_tf_pos_to增加__start_pos_offset
+	match (_send_from_right): #判断本气泡来自的侧向
+		false: #左侧
+			CBS.newest_bubble_side = 1 #将CBS的新气泡侧向记录为左侧
+		true: #右侧
+			CBS.newest_bubble_side = 2 #将CBS的新气泡侧向记录为右侧
+	CBS.current.emit_signal("bubbles_add_number") #广播信号bubbles_add_number，将让所有气泡记录自己
 
 func _refit_position() -> void: #根据气泡渲染的形状和坐标变换的起始位置适配目标位置，跟随气泡构建函数一起使用，可被重复调用。适用于输入气泡变形为成品气泡
 	pass

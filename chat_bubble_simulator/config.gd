@@ -8,17 +8,22 @@ extends Object
 ##     |      |      |       ##
 ##     V      V      V       ##
 
-#	气泡字体资源
-static var label_font: Font = preload("res://fonts/PingFangSC-Medium.otf")
-#	
+#	These default values are adapt to Viewport size (1080, 1080)
+
+
+#	气泡字体资源，为null时使用Label节点的默认字体
+static var label_font: Font = null
+#	Default = null
+
 
 #	时间速率TimeSpeed
 static var time_speed: float = 1.0
-#
+#	Default = 1.0
+
 
 #	背景颜色
 static var background_color: Color = Color.WHITE
-#	background_color
+#	Default = Color.WHITE
 
 
 #	左侧气泡的配置
@@ -26,7 +31,10 @@ static var left_bubble_config: CBS.BubbleConfig = CBS.BubbleConfig.new(
 	Color.LIGHT_GRAY, # <--- fill color
 	Color.BLACK # <--- text color
 )
-#	left_bubble_config
+#	Default = CBS.BubbleConfig.new(
+#	Color.LIGHT_GRAY, # <--- fill color
+#	Color.BLACK # <--- text color
+#)
 
 
 #	右侧气泡的配置
@@ -34,7 +42,10 @@ static var right_bubble_config: CBS.BubbleConfig = CBS.BubbleConfig.new(
 	Color.DODGER_BLUE, # <--- fill color
 	Color.WHITE # <--- text color
 )
-#	right_bubble_config
+#	Default = CBS.BubbleConfig.new(
+#	Color.DODGER_BLUE, # <--- fill color
+#	Color.WHITE # <--- text color
+#)
 
 
 #	气泡渲染的圆弧线段数
@@ -74,6 +85,7 @@ static var bubble_corner_animation_time: float = 0.5
 
 #	气泡基础像素单位UnitPixel
 static var bubble_unit_pixel: float = 48.0
+#	Default = 48.0
 #	(A bubble.)
 #	 ^ Control bubbles' zoom
 
@@ -87,13 +99,16 @@ static var bubble_corner_min_radius: float = 4.0
 
 #	气泡最大宽度乘数
 static var bubble_max_width_multiplier: float = 17.25
+#	Default = 17.25
 #	Bubble's max width (pixels) = this * bubble_unit_pixel
 #
 #	(A max length bubble.)
 #	|<------------------>| <-- THE EXAMPLE MAX WIDTH
 
+
 #	气泡文本最大宽度乘数
 static var bubble_text_max_width_multiplier: float = 16.0
+#	Default = 16.0
 #	Bubble's text max width (pixels) = this * bubble_unit_pixel
 #
 #	(I'm a bubble.)
@@ -107,12 +122,8 @@ static var bubble_text_max_width_multiplier: float = 16.0
 #	 |<--------------->| <-- THE EXAMPLE MAX WIDTH
 
 
-#	气泡输入宽度乘数TypingWidth
-#static var bubble_typing_width_multiplier: float = 4.0 / 3.0
-
-
 #	气泡侧向边距长度乘数
-static var screen_bubble_border_distance_multiplier: float = 0.025
+static var screen_bubble_border_distance_multiplier: float = 0.25
 #	the distance = this * bubble_unit_pixel
 #
 #	| (A left bubble.)      |
@@ -123,7 +134,7 @@ static var screen_bubble_border_distance_multiplier: float = 0.025
 
 
 #	气泡底部边距长度乘数
-static var screen_bubble_bottom_distance_multiplier: float = 0.025
+static var screen_bubble_bottom_distance_multiplier: float = 0.25
 #	the distance = this * bubble_unit_pixel
 #
 #	|     (A right bubble.) |
@@ -135,8 +146,8 @@ static var screen_bubble_bottom_distance_multiplier: float = 0.025
 
 
 #	同侧气泡的纵向间距乘数
-static var screen_same_side_bubbles_distance_multiplier: float = 0.2
-#	the distance = this * viewport_width * screen_bubble_bottom_distance_multiplier
+static var screen_same_side_bubbles_distance_multiplier: float = 0.25
+#	the distance = this * bubble_unit_pixel * screen_bubble_bottom_distance_multiplier
 #
 #	|     (A right bubble.) |
 #	|                    ]<-|--- THE HEIGHT OF HERE
@@ -194,10 +205,12 @@ static var auto_free: bool = false
 
 
 #	自动退出
-static var auto_exit: bool = true
+static var auto_exit: bool = false
+#	Default = true
 #	auto_exit, control project auto exit when simulation finished
 
 
 #	自动退出等待时间
 static var auto_exit_wait_time: float = 1.0
+#	Default = 1.0
 #	auto_exit_wait_time(seconds)

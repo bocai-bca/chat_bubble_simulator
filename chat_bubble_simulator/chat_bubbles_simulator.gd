@@ -5,7 +5,7 @@ extends Node2D
 signal bubbles_move(relative_pos: Vector2)
 signal bubbles_add_number()
 
-const CURRENT_VERSION: String = "0.2.2"
+const CURRENT_VERSION: String = "0.2.3"
 const WORK_MODE_VIDEO: int = 0
 const WORK_MODE_IMAGE: int = 1
 
