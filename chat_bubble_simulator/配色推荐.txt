@@ -1,0 +1,20 @@
+本文本文件将展示由CBS作者本人提供的配色推荐，可用于填写进config.gd中，以模仿许多知名聊天软件的界面配色。
+以下将以三个部分为一组展示不同配色方案推荐，格式为：
+<配色方案名称>
+	背景颜色：<背景颜色>
+	左气泡：
+		<气泡填充颜色>
+		<气泡文本颜色>
+	右气泡：
+		<气泡填充颜色>
+		<气泡文本颜色>
+
+苹果iMessage浅色主题-iMessage信息
+	背景颜色：Color.WHITE
+	左气泡：
+		Color.LIGHT_GRAY
+		Color.BLACK
+	右气泡：
+		Color.DODGER_BLUE
+		Color.WHITE
+

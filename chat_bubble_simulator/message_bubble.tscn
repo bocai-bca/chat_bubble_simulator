@@ -1,0 +1,97 @@
+[gd_scene load_steps=8 format=3 uid="uid://cr3b1dkt1mluv"]
+
+[ext_resource type="Script" path="res://message_bubble.gd" id="1_kke3o"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_y7518"]
+resource_local_to_scene = true
+radius = 12.0
+height = 64.0
+radial_segments = 4
+rings = 16
+
+[sub_resource type="QuadMesh" id="QuadMesh_ps16m"]
+resource_local_to_scene = true
+size = Vector2(64, 0)
+
+[sub_resource type="SphereMesh" id="SphereMesh_pcd3h"]
+resource_local_to_scene = true
+radius = 1.0
+height = 2.0
+radial_segments = 4
+rings = 16
+
+[sub_resource type="QuadMesh" id="QuadMesh_odqtd"]
+resource_local_to_scene = true
+size = Vector2(16, 15)
+
+[sub_resource type="LabelSettings" id="LabelSettings_latlr"]
+resource_local_to_scene = true
+line_spacing = -6.0
+font_color = Color(0, 0, 0, 1)
+shadow_size = 0
+
+[sub_resource type="SphereMesh" id="SphereMesh_fnshi"]
+radius = 5.0
+height = 10.0
+radial_segments = 4
+rings = 16
+
+[node name="MessageBubble" type="CanvasGroup"]
+script = ExtResource("1_kke3o")
+
+[node name="Bubble" type="Node2D" parent="."]
+
+[node name="UpCapsule" type="MeshInstance2D" parent="Bubble"]
+rotation = 1.5708
+mesh = SubResource("CapsuleMesh_y7518")
+
+[node name="Quad" type="MeshInstance2D" parent="Bubble"]
+mesh = SubResource("QuadMesh_ps16m")
+
+[node name="DownCapsule" type="MeshInstance2D" parent="Bubble"]
+rotation = 1.5708
+mesh = SubResource("CapsuleMesh_y7518")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="Bubble/DownCapsule"]
+rect = Rect2(0, -10, 16, 20)
+
+[node name="CornerSphere" type="MeshInstance2D" parent="Bubble"]
+position = Vector2(31, 15)
+mesh = SubResource("SphereMesh_pcd3h")
+
+[node name="UpCornerQuad" type="MeshInstance2D" parent="Bubble"]
+position = Vector2(24, 7.5)
+mesh = SubResource("QuadMesh_odqtd")
+
+[node name="DownCornerQuad" type="MeshInstance2D" parent="Bubble"]
+position = Vector2(23.5, 8)
+rotation = -1.5708
+mesh = SubResource("QuadMesh_odqtd")
+
+[node name="Text" type="Label" parent="."]
+offset_left = -16.0
+offset_top = -11.5
+offset_right = 16.0
+offset_bottom = 11.5
+text = "测试"
+label_settings = SubResource("LabelSettings_latlr")
+autowrap_mode = 1
+justification_flags = 160
+text_direction = 1
+
+[node name="SphereLeft" type="MeshInstance2D" parent="."]
+visible = false
+modulate = Color(0, 0, 0, 1)
+position = Vector2(-16, 0)
+mesh = SubResource("SphereMesh_fnshi")
+
+[node name="SphereMiddle" type="MeshInstance2D" parent="."]
+visible = false
+modulate = Color(0, 0, 0, 1)
+mesh = SubResource("SphereMesh_fnshi")
+
+[node name="SphereRight" type="MeshInstance2D" parent="."]
+visible = false
+modulate = Color(0, 0, 0, 1)
+position = Vector2(16, 0)
+mesh = SubResource("SphereMesh_fnshi")
