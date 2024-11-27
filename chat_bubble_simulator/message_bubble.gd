@@ -85,7 +85,7 @@ func _physics_process(__delta: float) -> void:
 	(n_corner_sphere.mesh as SphereMesh).height = __corner_radius * 2.0
 	var __corner_quad_size: Vector2
 	n_corner_sphere.position = Vector2(__x_now / 2.0 - __corner_radius, __y_now + CBSConfig.bubble_unit_pixel * CBSConfig.bubble_capsule_thickness_multiplier - __corner_radius)
-	__corner_quad_size = Vector2(CBSConfig.bubble_unit_pixel, clampf(CBSConfig.bubble_unit_pixel - __corner_radius, 0.0, CBSConfig.bubble_unit_pixel))
+	__corner_quad_size = Vector2(CBSConfig.bubble_unit_pixel * CBSConfig.bubble_capsule_thickness_multiplier, clampf(CBSConfig.bubble_unit_pixel * CBSConfig.bubble_capsule_thickness_multiplier - __corner_radius, 0.0, CBSConfig.bubble_unit_pixel * CBSConfig.bubble_capsule_thickness_multiplier))
 	(n_corner_quad_up.mesh as QuadMesh).size = __corner_quad_size #两个气泡角矩形使用同一个网格，所以设置上矩形等同于一起设置了下矩形
 	n_corner_quad_up.position = Vector2(__x_now / 2.0 - __corner_quad_size.x / 2.0, n_down_capsule.position.y + __corner_quad_size.y / 2.0)
 	n_corner_quad_down.position = Vector2(__x_now / 2.0 - __corner_radius - __corner_quad_size.y / 2.0, n_down_capsule.position.y + __corner_quad_size.x / 2.0)
