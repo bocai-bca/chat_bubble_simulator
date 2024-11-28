@@ -33,6 +33,43 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	print("Chat Bubble Simulator initializing, version: " + CURRENT_VERSION)
+	
+	if (CBSConfig.auto_search_font): #是否开启自动搜索字体
+		print("AutoSearchFont = True")
+		if (not DirAccess.dir_exists_absolute("res://fonts")): #如果fonts目录不存在
+			print("AutoFontSearching: Folder \"fonts\" not found, creating...")
+			DirAccess.make_dir_absolute("res://fonts") #创建fonts目录
+		var _fonts_dir: DirAccess = DirAccess.open("res://fonts") #打开fonts目录
+		if (DirAccess.get_open_error() != OK): #如果打开有问题
+			print("AutoFontSearching: Error on opening DirAccess. Searching cancelled.")
+		else: #否则(如果打开没问题)
+			var _files_in_fonts: PackedStringArray = _fonts_dir.get_files() #获取文件列表
+			if (_files_in_fonts.size() >= 1): #如果找到了文件
+				print("AutoFontSearching: Found files:")
+				for _file in _files_in_fonts: #遍历找到的文件
+					print("	", _file)
+				if (_files_in_fonts.has("font.tres") and load("res://fonts/font.tres") is Font): #如果存在font.tres且有效
+					print("AutoFontSearching: Using \"font.tres\".")
+					CBSConfig.label_font = load("res://fonts/font.tres") as Font
+				elif (_files_in_fonts.has("font.ttf") and load("res://fonts/font.ttf") is Font): #如果存在font.ttf且有效
+					print("AutoFontSearching: Using \"font.ttf\".")
+					CBSConfig.label_font = load("res://fonts/font.ttf") as Font
+				elif (_files_in_fonts.has("font.fontdata") and load("res://fonts/font.fontdata") is Font): #如果存在font.fontdata且有效
+					print("AutoFontSearching: Using \"font.fontdata\".")
+					CBSConfig.label_font = load("res://fonts/font.fontdata") as Font
+				else: #如果都不存在或有效，就遍历
+					for _file_name in _files_in_fonts: #遍历找到的文件
+						var _file_postfix_name: String = _file_name.split(".")[-1] #获取文件后缀名
+						if (_file_postfix_name == "tres" or _file_postfix_name == "ttf" or _file_postfix_name == "fontdata"): #检查后缀名是否匹配
+							if (load("res://fonts/" + _file_name) is Font): #如果文件是字体资源
+								print("AutoFontSearching: Using \"", _file_name, "\".")
+								CBSConfig.label_font = load("res://fonts/" + _file_name) as Font #应用字体
+								break
+			else: #否则(没有找到文件)
+				print("AutoFontSearching: No file found. Searching cancelled.")
+	else:
+		print("AutoSearchFont = False")
+	
 	var __total_messages: int = CBSConfig.messages.size() #消息条数总计
 	if (CBSConfig.work_mode == WORK_MODE_VIDEO):
 		print("Work mode = Video Mode")

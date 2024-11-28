@@ -11,6 +11,15 @@ extends Object
 #	These default values are adapt to Viewport size (1080, 1080)
 
 
+#	是否自动搜索字体，启用时CBS将在每次启动时从项目的"根目录\fonts"文件夹中搜索可用的字体
+#	详细细节：
+#		将在"res://fonts"打开DirAccess，如果该文件夹不存在，将自动创建
+#		若存在名为"font.*"的文件，将优先使用它("*"部分允许tres、fontdata、ttf)
+#		当该文件不存在或不可用时，将使用该文件夹中其他符合后缀名的文件作为字体读取
+static var auto_search_font: bool = true
+#	Default = true
+
+
 #	气泡字体资源，为null时使用Label节点的默认字体
 static var label_font: Font = null
 #	Default = null
@@ -84,8 +93,8 @@ static var bubble_corner_animation_time: float = 0.5
 
 
 #	气泡基础像素单位UnitPixel
-static var bubble_unit_pixel: float = 64.0
-#	Default = 48.0
+static var bubble_unit_pixel: float = 40.0
+#	Default = 40.0
 #	(A bubble.)
 #	 ^ Control bubbles' zoom
 
@@ -123,8 +132,8 @@ static var bubble_text_max_width_multiplier: float = 16.0
 
 
 #	气泡胶囊厚度乘数
-static var bubble_capsule_thickness_multiplier: float = 0.75
-#	Default = 0.75
+static var bubble_capsule_thickness_multiplier: float = 0.85
+#	Default = 0.85
 #	The width of empty areas where between text and bubbles' bound (pixels) = this * bubble_unit_pixel
 #
 #	⌈              ⌉ <--- THIS AREA
@@ -176,13 +185,11 @@ static var work_mode: int = CBS.WORK_MODE_VIDEO
 static var messages: Array[CBS.MessageStruct] = [
 	#CBS.MessageStruct.new(false, "Example left.", 0.0, 1.2),
 	#CBS.MessageStruct.new(true, "Example right.", 1.7, 0.0),
-	CBS.MessageStruct.new(false, "因为爱情", 1.0),
-	CBS.MessageStruct.new(false, "不会轻易悲伤", 0.5),
-	CBS.MessageStruct.new(false, "因为爱情", 1.0),
-	CBS.MessageStruct.new(false, "简单的生长", 0.5),
+	CBS.MessageStruct.new(false, "欢迎来到《聊天气泡模拟器》", 1.0),
+	CBS.MessageStruct.new(false, "这是一个GodotEngine 4.3项目", 0.5),
+	CBS.MessageStruct.new(false, "本视频将带你一览本项目的效果和玩法", 0.5),
 	
-	CBS.MessageStruct.new(true, "所以一切都是幸福的模样", 2.0),
-	CBS.MessageStruct.new(true, "依然随时可以为你疯狂", 1.0),
+	CBS.MessageStruct.new(true, "我准备好了", 3.5),
 ]
 #	messages, each element is a message bubble.
 #
@@ -220,3 +227,8 @@ static var auto_exit: bool = false
 static var auto_exit_wait_time: float = 1.0
 #	Default = 1.0
 #	auto_exit_wait_time(seconds)
+
+
+#	是否显示气泡生成时的调试信息
+static var print_bubble_creating_debug: bool = false
+#	Default = false

@@ -41,7 +41,8 @@ func _enter_tree() -> void:
 	CBS.current.bubbles_add_number.connect(on_bubbles_add_number) #连接增加气泡序号的信号
 
 func _ready() -> void:
-	print("Bubble Creating Debug: open , right = ", _send_from_right)
+	if (CBSConfig.print_bubble_creating_debug):
+		print("Bubble Creating Debug: open , right = ", _send_from_right)
 	if (CBSConfig.label_font != null):
 		n_text.label_settings.font = CBSConfig.label_font
 	_old_build_bubble()
@@ -146,7 +147,8 @@ func _old_build_bubble() -> void: #直接成品气泡构建函数，将气泡各
 	(n_corner_sphere.mesh as SphereMesh).rings = CBSConfig.bubble_mesh_rings #设置气泡环数
 	# /求气泡大小并构成气泡
 	# 设置颜色
-	print("Bubble Creating Debug: setting color")
+	if (CBSConfig.print_bubble_creating_debug):
+		print("Bubble Creating Debug: setting color")
 	n_bubble.modulate = _config.fill_color
 	n_text.label_settings.font_color = _config.text_color
 	# /设置颜色
@@ -245,7 +247,8 @@ func _new_fit_position() -> void: #从_old_fit_position()修改而来的坐标�
 	#/移动目标坐标赋值
 	#同侧气泡计算
 	if ((_send_from_right and CBS.newest_bubble_side == 2) or (not _send_from_right and CBS.newest_bubble_side == 1)): #如果本气泡与上一个气泡同侧
-		print("Bubble Creating Debug: same side")
+		if (CBSConfig.print_bubble_creating_debug):
+			print("Bubble Creating Debug: same side")
 		__start_pos_offset.y += __bottom_distance * clampf(1.0 - CBSConfig.screen_same_side_bubbles_distance_multiplier, 0.0, 1.0) #将偏移值加上同侧气泡的距离缩短
 	#/同侧气泡计算
 	#计算并赋出_tf_pos_from和_tf_pos_to
@@ -277,7 +280,8 @@ func _find_min_length_of_line(__single_line: String, out__is_auto_warp: Array[bo
 			n_text.set_size(Vector2(__result, 0.0)) #设定缩减X后的宽度
 			if (n_text.get_line_count() != __current_lines): #如果显示行数变了
 				__result += 1.0 #将输出增加1
-				print("Bubble Creating Debug: x decreasing finished, width is ", __result)
+				if (CBSConfig.print_bubble_creating_debug):
+					print("Bubble Creating Debug: x decreasing finished, width is ", __result)
 				break #退出循环
 	return clampf(__result, (CBSConfig.bubble_max_width_multiplier - CBSConfig.bubble_text_max_width_multiplier) * CBSConfig.bubble_unit_pixel * 1.5, __result)
 
