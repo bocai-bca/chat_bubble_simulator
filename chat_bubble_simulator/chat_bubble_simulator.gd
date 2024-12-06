@@ -5,7 +5,7 @@ extends Node2D
 signal bubbles_move(relative_pos: Vector2)
 signal bubbles_add_number()
 
-const CURRENT_VERSION: String = "0.2.4"
+const CURRENT_VERSION: String = "0.2.5"
 const WORK_MODE_VIDEO: int = 0
 const WORK_MODE_IMAGE: int = 1
 
@@ -33,7 +33,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	print("Chat Bubble Simulator initializing, version: " + CURRENT_VERSION)
-	
+
 	if (CBSConfig.auto_search_font): #是否开启自动搜索字体
 		print("AutoSearchFont = True")
 		if (not DirAccess.dir_exists_absolute("res://fonts")): #如果fonts目录不存在
@@ -65,11 +65,12 @@ func _ready() -> void:
 								print("AutoFontSearching: Using \"", _file_name, "\".")
 								CBSConfig.label_font = load("res://fonts/" + _file_name) as Font #应用字体
 								break
+					print("AutoFontSearching: No file is usable. Searching cancelled.")
 			else: #否则(没有找到文件)
 				print("AutoFontSearching: No file found. Searching cancelled.")
 	else:
 		print("AutoSearchFont = False")
-	
+
 	var __total_messages: int = CBSConfig.messages.size() #消息条数总计
 	if (CBSConfig.work_mode == WORK_MODE_VIDEO):
 		print("Work mode = Video Mode")
