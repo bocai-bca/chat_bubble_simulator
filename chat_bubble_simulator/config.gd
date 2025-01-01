@@ -2,6 +2,34 @@
 class_name CBSConfig
 extends Object
 
+## 选项行号索引Index:
+## 自动搜索字体(auto_search_font) = 47
+## 气泡字体资源(label_font) = 52
+## 时间速率(time_speed) = 57
+## 背景颜色(background_color) = 62
+## 左气泡配置(left_bubble_config) = 67
+## 右气泡配置(right_bubble_config) = 78
+## 气泡渲染圆弧顶点数(bubble_mesh_rings) = 89
+## 气泡变换缓动曲线值(bubble_transform_ease_curve) = 94
+## 气泡淡入时间(bubble_fadein_time) = 100
+## 文本开始淡入时间(text_fadein_start_time) = 106
+## 文本淡入时间(text_fadein_time) = 112
+## 气泡角变换时间(bubble_corner_animation_time) = 118
+## 气泡基础像素单位(bubble_unit_pixel) = 124
+## 气泡角最小半径(bubble_corner_min_radius) = 131
+## 气泡最大宽度乘数(bubble_max_width_multiplier) = 138
+## 气泡文本最大宽度乘数(bubble_text_max_width_multiplier) = 147
+## 气泡胶囊厚度乘数(bubble_capsule_thickness_multiplier) = 163
+## 气泡侧向边距长度乘数(screen_bubble_border_distance_multiplier) = 172
+## 气泡底部边距长度乘数(screen_bubble_bottom_distance_multiplier) = 183
+## 同侧气泡的纵向间距乘数(screen_same_side_bubbles_distance_multiplier) = 195
+## 工作模式(work_mode) = 204
+## 气泡超出屏幕后自动删除(auto_free) = 213
+## 自动退出(auto_exit) = 219
+## 自动退出等待时间(auto_exit_wait_time) = 225
+## 是否显示气泡生成时的调试信息(print_bubble_creating_debug) = 231
+## 消息列表(messages) = 236
+
 ## You can only modify below ##
 ##     |      |      |       ##
 ##     |      |      |       ##
@@ -57,7 +85,7 @@ static var right_bubble_config: CBS.BubbleConfig = CBS.BubbleConfig.new(
 #)
 
 
-#	气泡渲染的圆弧线段数
+#	气泡渲染圆弧顶点数
 static var bubble_mesh_rings: int = 16
 #	bubble_mesh_rings, be used at the attribute mesh.rings of MeshInstance2D of each bubble.
 
@@ -181,6 +209,29 @@ static var work_mode: int = CBS.WORK_MODE_VIDEO
 #			for create a static image, run project normally
 
 
+#	气泡超出屏幕后自动删除(未完成)
+static var auto_free: bool = false
+#	Free bubble nodes which are out of viewport automatically.
+#	Only work on Video Mode.
+
+
+#	自动退出
+static var auto_exit: bool = false
+#	Default = true
+#	auto_exit, control project auto exit when simulation finished
+
+
+#	自动退出等待时间
+static var auto_exit_wait_time: float = 1.0
+#	Default = 1.0
+#	auto_exit_wait_time(seconds)
+
+
+#	是否显示气泡生成时的调试信息
+static var print_bubble_creating_debug: bool = false
+#	Default = false
+
+
 #	消息列表Messages
 static var messages: Array[CBS.MessageStruct] = [
 	#CBS.MessageStruct.new(false, "Example left.", 0.0, 1.2),
@@ -209,26 +260,3 @@ static var messages: Array[CBS.MessageStruct] = [
 #			CBS.MessageStruct.new(false, "like us right now", 0.5),
 #			CBS.MessageStruct.new(true, "WOW COOL", 5.0)
 #		]
-
-
-#	气泡超出屏幕后自动删除(未完成)
-static var auto_free: bool = false
-#	Free bubble nodes which are out of viewport automatically.
-#	Only work on Video Mode.
-
-
-#	自动退出
-static var auto_exit: bool = false
-#	Default = true
-#	auto_exit, control project auto exit when simulation finished
-
-
-#	自动退出等待时间
-static var auto_exit_wait_time: float = 1.0
-#	Default = 1.0
-#	auto_exit_wait_time(seconds)
-
-
-#	是否显示气泡生成时的调试信息
-static var print_bubble_creating_debug: bool = false
-#	Default = false

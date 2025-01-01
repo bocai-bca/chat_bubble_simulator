@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="Chat Bubbles Simulator"
-config/version="0.2.4"
+config/name="Chat Bubble Simulator"
+config/version="0.2.6"
 run/main_scene="res://chat_bubble_simulator.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 boot_splash/bg_color=Color(0.101961, 0.101961, 0.101961, 1)
