@@ -1,6 +1,5 @@
 README施工中...  
-English README [here](.github/README_EN.md)
-
+[转到config.gd参考文档](.github/config_zh.md)  
 
 # 聊天气泡模拟器(简称CBS)  
 
