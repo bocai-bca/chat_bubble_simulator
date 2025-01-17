@@ -26,6 +26,7 @@ size = Vector2(16, 15)
 
 [sub_resource type="LabelSettings" id="LabelSettings_latlr"]
 resource_local_to_scene = true
+line_spacing = -6.0
 font_color = Color(0, 0, 0, 1)
 shadow_size = 0
 
@@ -72,7 +73,6 @@ offset_left = -16.0
 offset_top = -11.5
 offset_right = 16.0
 offset_bottom = 11.5
-text = "测试"
 label_settings = SubResource("LabelSettings_latlr")
 autowrap_mode = 1
 justification_flags = 160
