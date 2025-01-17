@@ -5,9 +5,11 @@ extends Node2D
 signal bubbles_move(relative_pos: Vector2)
 signal bubbles_add_number()
 
-const CURRENT_VERSION: String = "0.2.6"
+const CURRENT_VERSION: String = "0.2.7"
 const WORK_MODE_VIDEO: int = 0
 const WORK_MODE_IMAGE: int = 1
+
+const SUPPORT_FONT_POSTFIX: PackedStringArray = [".tres", ".res", ".ttf", ".fontdata", ".ttc", ".otf", ".otc", ".woff", ".woff2", ".pfb", ".pfm", ".fnt", ".font"] #自动字体搜寻所支持的所有文件后缀
 
 static var viewport_width: float
 static var viewport_height: float
@@ -48,23 +50,23 @@ func _ready() -> void:
 				print("AutoFontSearching: Found files:")
 				for _file in _files_in_fonts: #遍历找到的文件
 					print("	", _file)
-				if (_files_in_fonts.has("font.tres") and load("res://fonts/font.tres") is Font): #如果存在font.tres且有效
-					print("AutoFontSearching: Using \"font.tres\".")
-					CBSConfig.label_font = load("res://fonts/font.tres") as Font
-				elif (_files_in_fonts.has("font.ttf") and load("res://fonts/font.ttf") is Font): #如果存在font.ttf且有效
-					print("AutoFontSearching: Using \"font.ttf\".")
-					CBSConfig.label_font = load("res://fonts/font.ttf") as Font
-				elif (_files_in_fonts.has("font.fontdata") and load("res://fonts/font.fontdata") is Font): #如果存在font.fontdata且有效
-					print("AutoFontSearching: Using \"font.fontdata\".")
-					CBSConfig.label_font = load("res://fonts/font.fontdata") as Font
-				else: #如果都不存在或有效，就遍历
+				var _found_font_usable: bool = false
+				for _postfix in SUPPORT_FONT_POSTFIX: #遍历所有支持的后缀
+					if (_files_in_fonts.has("font" + _postfix) and load("res://fonts/font" + _postfix) is Font): #如果存在font.<后缀>且有效
+						print("AutoFontSearching: Using \"font" + _postfix + "\".")
+						CBSConfig.label_font = load("res://fonts/font" + _postfix) as Font
+						_found_font_usable = true
+						break
+				if (!_found_font_usable): #如果都不存在或有效，就遍历
 					for _file_name in _files_in_fonts: #遍历找到的文件
 						var _file_postfix_name: String = _file_name.split(".")[-1] #获取文件后缀名
-						if (_file_postfix_name == "tres" or _file_postfix_name == "ttf" or _file_postfix_name == "fontdata"): #检查后缀名是否匹配
+						if (SUPPORT_FONT_POSTFIX.has("." + _file_postfix_name)): #检查后缀名是否可用
 							if (load("res://fonts/" + _file_name) is Font): #如果文件是字体资源
 								print("AutoFontSearching: Using \"", _file_name, "\".")
 								CBSConfig.label_font = load("res://fonts/" + _file_name) as Font #应用字体
+								_found_font_usable = true
 								break
+				if (!_found_font_usable): #如果没有可用的文件
 					print("AutoFontSearching: No file is usable. Searching cancelled.")
 			else: #否则(没有找到文件)
 				print("AutoFontSearching: No file found. Searching cancelled.")

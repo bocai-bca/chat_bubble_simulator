@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Chat Bubble Simulator"
-config/version="0.2.6"
+config/version="0.2.7"
 run/main_scene="res://chat_bubble_simulator.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 boot_splash/bg_color=Color(0.101961, 0.101961, 0.101961, 1)
@@ -31,7 +31,7 @@ window/stretch/aspect="ignore"
 
 movie_writer/mix_rate=44100
 movie_writer/mjpeg_quality=0.5
-movie_writer/movie_file="D:/ItemBox/godot/chat_bubbles_simulator/movie_output/0.avi"
+movie_writer/movie_file="movie_output/0.avi"
 
 [rendering]
 

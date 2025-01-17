@@ -239,7 +239,7 @@ static var messages: Array[CBS.MessageStruct] = [
 	CBS.MessageStruct.new(false, "欢迎来到《聊天气泡模拟器》", 1.0),
 	CBS.MessageStruct.new(false, "这是一个GodotEngine 4.3项目", 0.5),
 	CBS.MessageStruct.new(false, "本视频将带你一览本项目的效果和玩法", 0.5),
-	
+
 	CBS.MessageStruct.new(true, "我准备好了", 3.5),
 ]
 #	messages, each element is a message bubble.
