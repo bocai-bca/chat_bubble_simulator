@@ -47,13 +47,21 @@ func _ready() -> void:
 		n_text.label_settings.font = CBSConfig.label_font
 	_old_build_bubble()
 	_new_fit_position()
-	if (_send_from_right):
-		CBS.current.n_audio_imessage_send.play()
-	else:
-		CBS.current.n_audio_imessage_receive.play()
+	if (CBSConfig.work_mode == CBS.WORK_MODE_VIDEO):
+		if (_send_from_right):
+			CBS.current.n_audio_imessage_send.play()
+		else:
+			CBS.current.n_audio_imessage_receive.play()
+
+func _process(__delta: float) -> void:
+	if (CBSConfig.work_mode == CBS.WORK_MODE_IMAGE):
+		_base_process(60.0)
 
 func _physics_process(__delta: float) -> void:
-	__delta *= CBSConfig.time_speed
+	if (CBSConfig.work_mode == CBS.WORK_MODE_VIDEO):
+		_base_process(__delta * CBSConfig.time_speed)
+
+func _base_process(__delta: float) -> void:
 	self_modulate = Color(Color.WHITE, clampf(_life_timer, 0.0, CBSConfig.bubble_fadein_time) / CBSConfig.bubble_fadein_time)
 	#n_text.modulate = Color(Color.WHITE, ease((_life_timer - CBSConfig.bubble_fadein_time) / CBSConfig.text_fadein_time, CBSConfig.bubble_transform_ease_curve)) #平滑阶梯，二选一
 	n_text.modulate = Color(Color.WHITE, clampf((_life_timer - CBSConfig.text_fadein_start_time) / CBSConfig.text_fadein_time, 0.0, 1.0)) #线性，二选一
@@ -108,6 +116,7 @@ func _old_build_bubble() -> void: #直接成品气泡构建函数，将气泡各
 	n_text.label_settings.font_size = int(CBSConfig.bubble_unit_pixel) #设置文本字体大小
 	n_text.modulate = Color(1.0, 1.0, 1.0, 0.0)
 	# 求文本框大小
+	n_text.label_settings.line_spacing = CBSConfig.line_spacing #设置行间距
 	var __text_splitted: PackedStringArray = text.split("\n") #将文本以行列分段的列表
 	var __length_array: Array[float] = [] #长度表
 	var __is_auto_warp: Array[bool] = [false] #记录是否存在自动换行的情况的引用布尔，如果为true表示当前存在单行文本以多行显示的情况

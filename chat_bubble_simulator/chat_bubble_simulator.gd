@@ -2,10 +2,12 @@
 class_name CBS
 extends Node2D
 
+@warning_ignore("unused_signal")
 signal bubbles_move(relative_pos: Vector2)
+@warning_ignore("unused_signal")
 signal bubbles_add_number()
 
-const CURRENT_VERSION: String = "0.2.7"
+const CURRENT_VERSION: String = "0.2.8"
 const WORK_MODE_VIDEO: int = 0
 const WORK_MODE_IMAGE: int = 1
 
@@ -20,13 +22,14 @@ var _left_timer: float = 0.0 #左侧计时器
 var _right_timer: float = 0.0 #右侧计时器
 var _left_array: Array[MessageStruct] = [] #左侧气泡列表，用于Video模式
 var _right_array: Array[MessageStruct] = [] #右侧气泡列表，用于Video模式
-var _left_index: int = 0 #CBSConfig.messages的索引计数，用于左侧气泡列表
-var _right_index: int = 0 #CBSConfig.messages的索引计数，用于右侧气泡列表
+var _left_index: int = 0 #CBSConfig.messages的索引计数，用于左侧气泡列表，只在Video模式生效
+var _right_index: int = 0 #CBSConfig.messages的索引计数，用于右侧气泡列表，只在Video模式生效
 var _auto_exit_timer: float = 0.0 #自动退出计时器
 
 @onready var n_background_color: ColorRect = get_node("BackgroundColor")
 @onready var n_audio_imessage_send: AudioStreamPlayer = get_node("Audio_iMessageSend")
 @onready var n_audio_imessage_receive: AudioStreamPlayer = get_node("Audio_iMessageReceive")
+@onready var n_bubbles: Node2D = get_node("Bubbles")
 
 func _enter_tree() -> void:
 	current = self
@@ -35,6 +38,11 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	print("Chat Bubble Simulator initializing, version: " + CURRENT_VERSION)
+
+	if (Engine.get_write_movie_path() != "" and CBSConfig.work_mode == WORK_MODE_IMAGE): #获取MovieMaker的输出路径，不为空表示开了MovieMaker，并且当前处于图片模式
+		print("Warning! It isn't allowed to enable MovieMaker when run as Image Mode.\nLaunching cancelling...")
+		get_tree().quit(1) #退出
+		return
 
 	if (CBSConfig.auto_search_font): #是否开启自动搜索字体
 		print("AutoSearchFont = True")
@@ -89,6 +97,9 @@ func _ready() -> void:
 		__max_time = maxf(__max_time, __right_side_time) #将最大时间设为左侧和右侧中更大的那一个
 		print("Total messages = " + str(__total_messages))
 		print("Total time = " + str(__max_time))
+		if (not DirAccess.dir_exists_absolute("res://movie_output")): #如果movie_output目录不存在
+			print("VideoMode: Folder \"movie_output\" not found, creating...")
+			DirAccess.make_dir_absolute("res://movie_output") #创建movie_output目录
 	else:
 		print("Work mode = Image Mode")
 		print("Total messages = " + str(__total_messages))
@@ -99,7 +110,36 @@ func _ready() -> void:
 	if (_state == 0):
 		_state = 1
 
+func _process(__delta: float) -> void:
+	if (CBSConfig.work_mode != WORK_MODE_IMAGE):
+		return
+	if (_state == 1): #如果处于主循环
+		_main_image()
+	if (_state == 9):
+		_main_image_set_viewport()
+	if (_state >= 10): #如果主循环已完成
+		if (_state == 10): #位于第10刻时进行截图
+			if (not DirAccess.dir_exists_absolute("res://image_output")): #如果image_output目录不存在
+				print("ImageMode: Folder \"image_output\" not found, creating...")
+				DirAccess.make_dir_absolute("res://image_output") #创建image_output目录
+			var _date_dict: Dictionary = Time.get_datetime_dict_from_system() #获取系统时间字典
+			var _date_time: String = str(_date_dict.year) + "_" + str(_date_dict.month) + "_" + str(_date_dict.day) + "_" + str(_date_dict.hour) + "_" + str(_date_dict.minute) + "_" + str(_date_dict.second) #组合时间字符串
+			var _random_postfix: String = ""
+			while (true): #获取时间并设为文件名
+				if (not FileAccess.file_exists("res://image_output/"+_date_time+_random_postfix+".png")): #如果路径中没有重名文件
+					break
+				_random_postfix = "_%x" % str(randi_range(16, 255)) #生成一个随机二位十六进制数后缀
+			var _final_path: String = "res://image_output/"+_date_time+"_"+_random_postfix+".png"
+			get_window().get_texture().get_image().save_png(_final_path) #保存图片文件
+			if (FileAccess.file_exists(_final_path)): #检查文件是否存在
+				print("ImageMode: Image has been outputted at ", _final_path)
+		elif (_state >= 11 and CBSConfig.auto_exit): #11刻之后，并且开启了自动退出
+			get_tree().quit()
+	_state += 1 #进行延时
+
 func _physics_process(__delta: float) -> void:
+	if (CBSConfig.work_mode != WORK_MODE_VIDEO):
+		return
 	if (_state >= 2 and CBSConfig.auto_exit): #退出处理逻辑
 		_auto_exit_timer += __delta
 		if (_auto_exit_timer >= CBSConfig.auto_exit_wait_time):
@@ -108,11 +148,7 @@ func _physics_process(__delta: float) -> void:
 			_state += 1
 	elif (_state == 1): #如果状态处于主循环
 		__delta *= CBSConfig.time_speed
-		match (CBSConfig.work_mode): #匹配工作模式
-			WORK_MODE_VIDEO:
-				_main_video(__delta)
-			WORK_MODE_IMAGE:
-				_main_image(__delta)
+		_main_video(__delta)
 
 func _main_video(__delta: float) -> void: #Video模式的主循环
 	_left_timer += __delta #左计时器加时
@@ -123,7 +159,7 @@ func _main_video(__delta: float) -> void: #Video模式的主循环
 			break #直接退出循环
 		if (_left_timer >= _left_array[_left_index].waiting_time): #当左计时器达到等待时长
 			_left_timer -= _left_array[_left_index].waiting_time #左计时器减去等待时长
-			add_child(MessageBubble.get_new(_left_array[_left_index].content, false, CBSConfig.left_bubble_config))
+			n_bubbles.add_child(MessageBubble.get_new(_left_array[_left_index].content, false, CBSConfig.left_bubble_config))
 			_left_index += 1
 		else: #左计时器未达到等待时长
 			__loop_control = false #结束循环
@@ -134,15 +170,38 @@ func _main_video(__delta: float) -> void: #Video模式的主循环
 		if (_right_timer >= _right_array[_right_index].waiting_time): #当右计时器达到等待时长
 			_right_timer -= _right_array[_right_index].waiting_time #右计时器减去等待时长
 			##生成新的右侧气泡
-			add_child(MessageBubble.get_new(_right_array[_right_index].content, true, CBSConfig.right_bubble_config))
+			n_bubbles.add_child(MessageBubble.get_new(_right_array[_right_index].content, true, CBSConfig.right_bubble_config))
 			_right_index += 1
 		else: #右计时器未达到等待时长
 			__loop_control = false #结束循环
 	if (_left_index >= _left_array.size() and _right_index >= _right_array.size() and minf(_left_timer, _right_timer) >= maxf(CBSConfig.bubble_fadein_time - CBSConfig.text_fadein_start_time + CBSConfig.text_fadein_time, CBSConfig.bubble_corner_animation_time)): #如果左侧右侧均已完成，并且数字最小的计时器也达到了气泡的淡入时间
 		_state = 2 #标记于接下来的第二刻退出项目
 
-func _main_image(__delta: float) -> void: #Image模式的主循环
-	pass
+func _main_image() -> void: #Image模式的主操作
+	for _message in CBSConfig.messages: #进入循环
+		if (_message.sender): #如果是右侧发出的
+			n_bubbles.add_child(MessageBubble.get_new(_message.content, true, CBSConfig.right_bubble_config))
+		else: #如果是左侧发出的
+			n_bubbles.add_child(MessageBubble.get_new(_message.content, false, CBSConfig.left_bubble_config))
+
+func _main_image_set_viewport() -> void:
+	var _window: Window = get_window() #获取根窗口
+	var _y_max: float = 0.0 #Y最大值
+	var _y_min: float = 0.0 #Y最小值
+	var _bubbles: Array[MessageBubble]
+	for _node in n_bubbles.get_children():
+		_bubbles.append(_node as MessageBubble)
+	for _bubble in _bubbles: #获取所有气泡
+		if (_bubble.bubble_number == 0): #屏幕最底部的气泡
+			_y_max = _bubble._tf_pos_to.y + _bubble._tf_bubble_y_to + (_bubble.n_down_capsule.mesh as CapsuleMesh).radius + CBSConfig.screen_bubble_bottom_distance_multiplier * CBSConfig.bubble_unit_pixel
+		if (_bubble.bubble_number == _bubbles.size() - 1): #屏幕最高处的气泡
+			_y_min = _bubble._tf_pos_to.y - (_bubble.n_up_capsule.mesh as CapsuleMesh).radius - CBSConfig.screen_bubble_bottom_distance_multiplier * CBSConfig.bubble_unit_pixel
+	var _window_size: Vector2i = Vector2i(viewport_width, int(_y_max - _y_min)) #计算新的窗口尺寸
+	_window.max_size = _window_size #设定窗口最大尺寸
+	_window.min_size = _window_size #设定窗口最大尺寸
+	_window.size = _window_size #设定窗口最大尺寸
+	n_background_color.custom_minimum_size = _window_size #设定背景尺寸
+	n_bubbles.position.y = _window.size.y - viewport_height #设定气泡显示位置偏移，显示将通过偏移抵消屏幕底部变更的距离
 
 class MessageStruct:
 	var content: String

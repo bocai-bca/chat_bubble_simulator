@@ -20,3 +20,5 @@ max_polyphony = 5
 stream = ExtResource("3_8ma3u")
 mix_target = 1
 max_polyphony = 5
+
+[node name="Bubbles" type="Node2D" parent="."]

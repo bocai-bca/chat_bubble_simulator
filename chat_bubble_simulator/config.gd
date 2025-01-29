@@ -28,7 +28,8 @@ extends Object
 ## 自动退出(auto_exit) = 219
 ## 自动退出等待时间(auto_exit_wait_time) = 225
 ## 是否显示气泡生成时的调试信息(print_bubble_creating_debug) = 231
-## 消息列表(messages) = 236
+## 行间距(line_spacing) = 236
+## 消息列表(messages) = 241
 
 ## You can only modify below ##
 ##     |      |      |       ##
@@ -135,7 +136,7 @@ static var bubble_corner_min_radius: float = 4.0
 
 
 #	气泡最大宽度乘数
-static var bubble_max_width_multiplier: float = 17.0
+static var bubble_max_width_multiplier: float = 23.0
 #	Default = 17.0
 #	Bubble's max width (pixels) = this * bubble_unit_pixel
 #
@@ -144,7 +145,7 @@ static var bubble_max_width_multiplier: float = 17.0
 
 
 #	气泡文本最大宽度乘数
-static var bubble_text_max_width_multiplier: float = 16.0
+static var bubble_text_max_width_multiplier: float = 22.0
 #	Default = 16.0
 #	Bubble's text max width (pixels) = this * bubble_unit_pixel
 #
@@ -201,7 +202,7 @@ static var screen_same_side_bubbles_distance_multiplier: float = 0.25
 
 
 #	工作模式WorkMode
-static var work_mode: int = CBS.WORK_MODE_VIDEO
+static var work_mode: int = CBS.WORK_MODE_IMAGE
 #	Value can be:
 #		CBS.WORK_MODE_VIDEO
 #			for use via Godot Movie Maker
@@ -216,7 +217,7 @@ static var auto_free: bool = false
 
 
 #	自动退出
-static var auto_exit: bool = false
+static var auto_exit: bool = true
 #	Default = true
 #	auto_exit, control project auto exit when simulation finished
 
@@ -232,15 +233,57 @@ static var print_bubble_creating_debug: bool = false
 #	Default = false
 
 
+#	行间距
+static var line_spacing: float = 3.0
+#	Default = -6.0
+
+
 #	消息列表Messages
 static var messages: Array[CBS.MessageStruct] = [
 	#CBS.MessageStruct.new(false, "Example left.", 0.0, 1.2),
 	#CBS.MessageStruct.new(true, "Example right.", 1.7, 0.0),
-	CBS.MessageStruct.new(false, "欢迎来到《聊天气泡模拟器》", 1.0),
-	CBS.MessageStruct.new(false, "这是一个GodotEngine 4.3项目", 0.5),
-	CBS.MessageStruct.new(false, "本视频将带你一览本项目的效果和玩法", 0.5),
-
-	CBS.MessageStruct.new(true, "我准备好了", 3.5),
+	CBS.MessageStruct.new(false, "《聊天气泡模拟器》0.2.8", 0.0),
+	CBS.MessageStruct.new(true, "来看看更新了什么", 0.0),
+	CBS.MessageStruct.new(false, "1.新增图片模式", 0.0),
+	CBS.MessageStruct.new(true, "哎~，config.gd里的work_mode选项终于有作用了", 0.0),
+	CBS.MessageStruct.new(true, "而且本张图就是这个模式生成的，你可以用它产生聊天记录长图", 0.0),
+	CBS.MessageStruct.new(true, "在图片模式中消息列表的时间参数将被无视，而是按照元素在数组中的排序来决定发送顺序", 0.0),
+	CBS.MessageStruct.new(false, "不用绞尽脑汁计算相对时间真是人性化多了", 0.0),
+	CBS.MessageStruct.new(true, "是啊，现在config.gd里看起来直观多了", 0.0),
+	CBS.MessageStruct.new(true, "以后视频模式的消息列表写法或许也会大改", 0.0),
+	CBS.MessageStruct.new(false, "让我们来看下一条", 0.0),
+	CBS.MessageStruct.new(false, "2.config.gd增加了一个调整行间距的选项", 0.0),
+	CBS.MessageStruct.new(true, "不同的字体在CBS中表现出不同纵向长度，唉我目前不知道怎么实现自动设置行间距，所以留了个选项可以让大家自己观察效果手调行间距", 0.0),
+	CBS.MessageStruct.new(true, "Godot默认中文字体是-6.0，本张图片使用的苹方字体是3.0，大家可以以此作为参考", 0.0),
+	CBS.MessageStruct.new(false, "没了", 0.0),
+	CBS.MessageStruct.new(true, "接下来演示一下长图的效果", 0.0),
+	CBS.MessageStruct.new(false, "不叫", 0.0),
+	CBS.MessageStruct.new(false, "叫地主", 0.0),
+	CBS.MessageStruct.new(true, "不抢", 0.0),
+	CBS.MessageStruct.new(false, "连对: 554433", 0.0),
+	CBS.MessageStruct.new(true, "要不起", 0.0),
+	CBS.MessageStruct.new(false, "连对: JJ十十99", 0.0),
+	CBS.MessageStruct.new(false, "不要", 0.0),
+	CBS.MessageStruct.new(false, "单走: 3", 0.0),
+	CBS.MessageStruct.new(false, "单走: 7", 0.0),
+	CBS.MessageStruct.new(true, "单走: 8", 0.0),
+	CBS.MessageStruct.new(false, "单走: J", 0.0),
+	CBS.MessageStruct.new(false, "单走: K", 0.0),
+	CBS.MessageStruct.new(true, "要不起", 0.0),
+	CBS.MessageStruct.new(false, "要不起", 0.0),
+	CBS.MessageStruct.new(false, "飞机: QQQQ十十88", 0.0),
+	CBS.MessageStruct.new(true, "炸弹: AAAA", 0.0),
+	CBS.MessageStruct.new(false, "要不起", 0.0),
+	CBS.MessageStruct.new(false, "不要", 0.0),
+	CBS.MessageStruct.new(true, "对子: 44", 0.0),
+	CBS.MessageStruct.new(false, "对子: 77", 0.0),
+	CBS.MessageStruct.new(false, "王炸: 大王小王", 0.0),
+	CBS.MessageStruct.new(true, "要不起", 0.0),
+	CBS.MessageStruct.new(false, "要不起", 0.0),
+	CBS.MessageStruct.new(false, "对子: 22", 0.0),
+	CBS.MessageStruct.new(false, "地主胜利", 0.0),
+	CBS.MessageStruct.new(true, "你丫的牌打得也忒好了", 0.0),
+	CBS.MessageStruct.new(false, "你丫的牌打得也忒好了", 0.0),
 ]
 #	messages, each element is a message bubble.
 #
@@ -250,7 +293,7 @@ static var messages: Array[CBS.MessageStruct] = [
 #	B: The content of this bubble.
 #	C: (Seconds) The waiting time to start this bubble's typing effect. Start timing at last same side bubble sent or project finished to launch. (Only work on Video Mode)
 #
-#	An example:
+#	An video mode example:
 #		static var messages: Array[CBS.MessageStruct] = [
 #			CBS.MessageStruct.new(true, "hi dear what are you doing?", 1.0),
 #			CBS.MessageStruct.new(false, "checking a godot project", 3.0),
@@ -259,4 +302,14 @@ static var messages: Array[CBS.MessageStruct] = [
 #			CBS.MessageStruct.new(false, "it can simulate chatting apps' ui", 1.0),
 #			CBS.MessageStruct.new(false, "like us right now", 0.5),
 #			CBS.MessageStruct.new(true, "WOW COOL", 5.0)
+#		]
+#
+#	An image mode example:
+#		static var messages: Array[CBS.MessageStruct] = [
+#			CBS.MessageStruct.new(false, "Bubble No.1", 0.0),
+#			CBS.MessageStruct.new(false, "Bubble No.2", 0.0),
+#			CBS.MessageStruct.new(true, "Bubble No.3", 0.0),
+#			CBS.MessageStruct.new(true, "Bubble No.4", 0.0),
+#			CBS.MessageStruct.new(false, "Bubble No.5", 0.0),
+#			CBS.MessageStruct.new(true, "Like you see, time argument is not effective anymore", 0.0)
 #		]
