@@ -7,6 +7,7 @@
 - **背景颜色(background_color)`Color`：设置背景颜色**
 - **左气泡配置(left_bubble_config)和右气泡配置(right_bubble_config)`CBS.BubbleConfig`：设置气泡和文本的颜色**
 - **气泡基础像素单位(bubble_unit_pixel)`float`：气泡渲染的终极核心参数，主要影响了气泡的大小、文本清晰度**
+- **工作模式(work_mode)`int`: 设定CBS的工作模式**
 - **消息列表(messages)`Array[CBS.MessageStruct]`：消息列表/聊天记录，设置文本、发送时间、发送方**
 
 ## 自动搜索字体(auto_search_font)  
@@ -173,7 +174,9 @@
 > 类型 = `int`  
 > 默认值 = 常量`CBS.WORK_MODE_VIDEO`  
 
-设定CBS的工作模式，目前只有视频模式可用。  
+设定CBS的工作模式。  
+填写`CBS.WORK_MODE_VIDEO`使用视频模式，该模式将播放消息发送的过程，用于通过MovieMaker录制视频的模式。  
+填写`CBS.WORK_MODE_IMAGE`使用图片模式，该模式将瞬间按列表元素顺序发出所有消息，并自动截取一张长图保存至目录`res://image_output`中，不可在此模式下使用MovieMaker。  
 
 
 ## 气泡超出屏幕后自动删除(auto_free)  
@@ -228,7 +231,7 @@ class MessageStruct:
 "文本"是该气泡的文本，建议使用转义符`\n`或`\r`表示换行，使用转义符`\\`表示符号`\`，使用转义符`\"`表示引号......以此类推，详情请参考Godot文档以了解哪些符号需要在双引号字符串中进行转义。  
 CBS中包含两个各自独立的计时器，分别为左侧和右侧气泡计时，每个计时器在己方气泡发出时会重置为0。因此，在编写消息列表时，在"发送延时"处填写该气泡距离同一侧的上一个气泡发出后的时间间隔。例如，想要编写一条第1秒发出的消息A和一条第3秒发出的消息B，那么A所需填写的时间为1.0，B所需填写的时间为2.0(即3-1=2)，如果再要加一条于第6秒发出的消息C，那么需要填写时间为3.0(6-3=3)。  
 
-示例：  
+一个视频模式示例：  
 ```
 CBS.MessageStruct.new(false,"第一条左气泡于0.0秒时发出",0.0),
 CBS.MessageStruct.new(true,"第一条右气泡于0.0秒发出",0.0),
@@ -236,6 +239,18 @@ CBS.MessageStruct.new(false,"第二条左气泡于2.0秒时发出",2.0),
 CBS.MessageStruct.new(true,"第二条右气泡于1.0秒发出",1.0),
 CBS.MessageStruct.new(true,"第三条右气泡于1.5秒发出",0.5),
 CBS.MessageStruct.new(false,"第三条左气泡于5.0秒时发出",3.0)
+```
+
+图片模式与视频模式的写法稍有不同。图片模式下"发送时间"参数将无效，取而代之的是消息将按每个`CBS.MessageStruct`实例在`messages`(本配置项)的值数组中的排列顺序依次发出。在图片模式下"发送时间"参数可以随便填，例如可以填`0.0`。  
+
+一个图片模式示例:  
+```
+CBS.MessageStruct.new(false,"第一条消息，是左气泡",0.0),
+CBS.MessageStruct.new(true,"第二条消息，是右气泡",0.0),
+CBS.MessageStruct.new(false,"第三条消息，是左气泡",0.0),
+CBS.MessageStruct.new(true,"第四条消息，是右气泡",0.0),
+CBS.MessageStruct.new(true,"第五条消息，是右气泡",0.0),
+CBS.MessageStruct.new(false,"第六条消息，是左气泡",0.0)
 ```
   
 
